@@ -1,0 +1,636 @@
+<html>
+<head>
+<title>Enregistrement en direct - CBILLING</title>
+<hta:application
+    id="iptvRecorder"
+    applicationname="Enregistreur IPTV VLC"
+    border="dialog"
+    borderstyle="normal"
+    caption="yes"
+    maximizebutton="no"
+    minimizebutton="yes"
+    showintaskbar="yes"
+    singleinstance="yes"
+    sysmenu="yes"
+    version="2.1"
+    windowstate="normal"
+/>
+<style>
+    body { font-family: Segoe UI, Arial; font-size: 20px; background: #f4f4f4; margin: 10px; overflow: hidden }
+    fieldset { margin-bottom: 10px; background: #ffffff; border: 1px solid #cccccc; }
+    legend { font-weight: bold; }
+    select, input[type=text] { width: 100%; padding: 6px; font-size: 20px; box-sizing: border-box; }
+    .marge_txt { margin-bottom: 8px; }
+	
+
+.timers {
+    width: 100%;
+    text-align: center;
+}
+
+#elapsedTimer {
+    font-size: 38px;
+    font-weight: bold;
+    text-align: center;
+    color: #008000;
+    background: #ffffff;
+    border: 3px solid #008000;
+    padding: 0px;
+}
+
+#bigTimer {
+    font-size: 38px;
+    font-weight: bold;
+    text-align: center;
+    color: #CB4127;
+    background: #ffffff;
+    border: 3px solid #CB4127;
+    padding: 0px;
+}
+	
+    #info {
+        font-family: Consolas, monospace; background: #eeeeee;
+        padding: 10px; min-height: 120px; white-space: pre-wrap;
+    }
+
+	
+	
+.button {
+    display: inline-block;
+	vertical-align: middle;
+    width: 160px;
+    height: 42px;
+    padding: 2px 10px;
+    box-sizing: border-box;
+    font-family: Segoe UI, Arial;
+    font-size: 22px;
+    font-weight: bold;
+    margin: 4px;
+    border: 1px solid #555555;
+    border-radius: 6px;
+    cursor: pointer;
+}
+button {
+    border-radius: 6px;
+    -webkit-appearance: none;
+}
+
+.saisie {
+    display: inline-block;
+	vertical-align: middle;
+    width: 160px;
+    height: 42px;
+    padding: 2px 10px;
+    box-sizing: border-box;
+    font-family: Segoe UI, Arial;
+    font-size: 22px;
+    font-weight: bold;
+    margin: 4px;
+    border: 1px solid #555555;
+    border-radius: 6px;
+}
+
+
+
+#watchBtn { background: #0379BD; color: white; }
+#startBtn { background: #2e7d32; color: white; }
+#stopBtn { background: #c62828; color: white; }
+
+#okIdent { background: #F0F0F0; color: #000;  }
+
+#watchBtn.inactif,
+#startBtn.inactif,
+#stopBtn.inactif {
+    background-color: #C0C0C0 !important;
+    color: #000000 !important;
+    border: 1px solid #999999 !important;
+    cursor: default !important;
+}
+
+.inactif {
+    cursor: default !important;
+}
+
+.texte_lib {
+    font-size: 22px;
+}
+
+</style>
+
+<script language="VBScript">
+Const VLC_PATH = "C:\Program Files\VideoLAN\VLC\vlc.exe"
+Const URL_BASE = "http://s04.wsbof.com:8080/s/"
+Const DEFAULT_IDENTIFIER = ""
+Const RC_PORT = "4212"
+
+Dim channels, recording, startDate, durationSeconds, timerId
+Dim scheduleEnabled, scheduleTime, scheduleTimerId
+Dim configFile
+Dim modeActif
+
+'	https://cbilling.eu/index.php?mode=idx
+
+channels = Array( _
+    "pervyj.m3u8", "rossija.m3u8", "ntv.m3u8", "ntv-mir.m3u8", _
+    "TNT.m3u8", "tnt4.m3u8", "CTC.m3u8", "bridge-tv-shlager.m3u8", _
+    "ru-tv.m3u8", "muz-tv.m3u8", "inter-ua.m3u8", "1-plus-1.m3u8", _
+    "2-plus-2-ua.m3u8", "ictv-ua.m3u8", "kus-kus-ua.m3u8", _
+    "novyj-kanal-ua.m3u8", "stb-ua.m3u8", "ntn-ua.m3u8", "24ch-ua.m3u8" _
+)
+
+Sub Window_OnLoad
+	window.resizeTo 720, 650
+    Dim i, suffix, label, optionItem, fso
+    recording = False
+    timerId = ""
+    scheduleEnabled = False
+    scheduleTimerId = ""
+    scheduleTime = ""
+	modeActif = ""
+	document.getElementById("elapsedTimer").innerText = "00:00:00"
+
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    configFile = fso.GetParentFolderName(location.pathname) & "\iptv_recorder.json"
+
+    document.getElementById("channelList").innerHTML = ""
+    For i = 0 To UBound(channels)
+        suffix = channels(i)
+        label = Replace(suffix, ".m3u8", "")
+        Set optionItem = document.createElement("option")
+        optionItem.value = suffix
+        optionItem.text = label
+        document.getElementById("channelList").add optionItem
+    Next
+
+    document.getElementById("identifier").value = DEFAULT_IDENTIFIER
+    LoadConfig
+    document.getElementById("duration").value = "60"
+	document.getElementById("duration_prog").value = "90"
+	document.getElementById("scheduleTime").value = "12:00"
+	
+    UpdateButtons
+    UpdateInfo "Pret." & vbCrLf & "Interface RC (127.0.0.1:" & RC_PORT & ")"
+End Sub
+
+Sub LoadConfig
+    Dim fso, ts, content, id
+    On Error Resume Next
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    If fso.FileExists(configFile) Then
+        Set ts = fso.OpenTextFile(configFile, 1)
+        content = ts.ReadAll
+        ts.Close
+        id = Trim(Replace(Replace(content, "{", ""), "}", ""))
+        id = Trim(Replace(id, """identifier"":", ""))
+        id = Trim(Replace(id, """", ""))
+        If id <> "" Then document.getElementById("identifier").value = id
+    End If
+    On Error GoTo 0
+End Sub
+
+Sub SaveConfig
+    Dim fso, ts, id
+    id = Trim(document.getElementById("identifier").value)
+    If id = "" Then Exit Sub
+    On Error Resume Next
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    Set ts = fso.CreateTextFile(configFile, True)
+    ts.Write "{""identifier"":""" & id & """}"
+    ts.Close
+    On Error GoTo 0
+    AppendInfo "Identifiant sauvegarde."
+End Sub
+
+
+Sub UpdateButtons
+
+    Dim watchBtn, startBtn, stopBtn
+
+    Set watchBtn = document.getElementById("watchBtn")
+    Set startBtn = document.getElementById("startBtn")
+    Set stopBtn = document.getElementById("stopBtn")
+	
+	watchBtn.disabled = (modeActif <> "")
+	startBtn.disabled = (modeActif <> "")
+	stopBtn.disabled = (modeActif = "")
+	
+	document.getElementById("razBtn").disabled = (modeActif <> "")
+
+    ' Réinitialisation des styles directs
+    watchBtn.style.backgroundColor = ""
+    watchBtn.style.color = ""
+
+    startBtn.style.backgroundColor = ""
+    startBtn.style.color = ""
+
+    stopBtn.style.backgroundColor = ""
+    stopBtn.style.color = ""
+
+    ' Etat initial
+    watchBtn.className = "button"
+    startBtn.className = "button"
+    stopBtn.className = "button inactif"
+
+    ' Visionnage ou enregistrement
+    If modeActif <> "" Then
+        watchBtn.className = "button inactif"
+        startBtn.className = "button inactif"
+        stopBtn.className = "button"
+    End If
+
+End Sub
+
+Sub StartViewing
+
+    Dim shell, identifier, channel, url
+
+    If modeActif <> "" Then Exit Sub
+
+    identifier = Trim(document.getElementById("identifier").value)
+
+    If identifier = "" Then
+        MsgBox "Identifiant manquant.", 48, "Erreur"
+        Exit Sub
+    End If
+
+    channel = document.getElementById("channelList").value
+
+    If channel = "" Then Exit Sub
+
+    url = URL_BASE & identifier & "/" & channel
+
+    Set shell = CreateObject("WScript.Shell")
+
+    CloseVLC
+
+    UpdateInfo "Lancement de VLC en mode visionnage..."
+
+    shell.Run """" & VLC_PATH & """ """ & url & """ --extraintf=rc --rc-host=127.0.0.1:" & RC_PORT & " --rc-quiet", 1, False
+
+    modeActif = "watching"
+
+    UpdateButtons
+    AppendInfo "Visionnage demarre."
+
+End Sub
+
+
+Sub UpdateInfo(text)
+    document.getElementById("info").innerText = text
+End Sub
+
+Sub AppendInfo(text)
+    document.getElementById("info").innerText = document.getElementById("info").innerText & vbCrLf & text
+End Sub
+
+Function IsVLCRunning()
+    Dim shell, result
+    Set shell = CreateObject("WScript.Shell")
+    result = shell.Run("cmd /c tasklist /FI ""IMAGENAME eq vlc.exe"" 2>nul | find /I ""vlc.exe"" >nul", 0, True)
+    IsVLCRunning = (result = 0)
+End Function
+
+Sub CloseVLC
+    Dim shell
+    Set shell = CreateObject("WScript.Shell")
+    shell.Run "cmd /c taskkill /F /IM vlc.exe >nul 2>&1", 0, True
+End Sub
+
+' Envoie une commande à l'interface RC de VLC
+Sub SendRC(cmd)
+    Dim shell, ps
+    Set shell = CreateObject("WScript.Shell")
+    ps = "powershell -NoProfile -Command ""$c = New-Object System.Net.Sockets.TcpClient('127.0.0.1'," & RC_PORT & "); $s = $c.GetStream(); $w = New-Object System.IO.StreamWriter($s); $w.WriteLine('" & cmd & "'); $w.Flush(); $c.Close()"""
+    shell.Run ps, 0, True
+End Sub
+
+Sub StartRecording
+    Dim shell, identifier, channel, minutes, url
+
+    If modeActif <> "" Then Exit Sub
+
+    identifier = Trim(document.getElementById("identifier").value)
+    If identifier = "" Then
+        MsgBox "Identifiant manquant.", 48, "Erreur"
+        Exit Sub
+    End If
+
+    If Not IsNumeric(document.getElementById("duration").value) Then
+        MsgBox "Duree invalide.", 48, "Erreur"
+        Exit Sub
+    End If
+    minutes = CDbl(document.getElementById("duration").value)
+    If minutes <= 0 Then
+        MsgBox "La duree doit etre > 0.", 48, "Erreur"
+        Exit Sub
+    End If
+
+    channel = document.getElementById("channelList").value
+    If channel = "" Then
+        MsgBox "Choisissez une chaine.", 48, "Erreur"
+        Exit Sub
+    End If
+
+    durationSeconds = CLng(minutes * 60)
+    url = URL_BASE & identifier & "/" & channel
+
+    Set shell = CreateObject("WScript.Shell")
+
+    CloseVLC
+
+    UpdateInfo "Lancement de VLC avec interface RC..."
+    shell.Run """" & VLC_PATH & """ """ & url & """ --extraintf=rc --rc-host=127.0.0.1:" & RC_PORT & " --rc-quiet", 1, False
+
+    ' Envoie la commande pour démarrer l'enregistrement
+    SendRC "key key-record"
+
+    recording = True
+	modeActif = "recording"
+    startDate = Now
+    UpdateButtons
+    AppendInfo "START envoye via RC."
+    AppendInfo "Duree programmee : " & minutes & " min"
+    timerId = window.setInterval("TimerTick", 1000)
+End Sub
+
+Sub StopRecording
+    If Not recording Then Exit Sub
+
+    AppendInfo "STOP envoye via RC..."
+    SendRC "key key-record"
+
+    CloseVLC
+
+    recording = False
+	modeActif = ""
+    If timerId <> "" Then
+        window.clearInterval timerId
+        timerId = ""
+    End If
+    UpdateButtons
+    AppendInfo "Enregistrement arrete."
+End Sub
+
+Sub StopAction
+    If modeActif = "recording" Then
+        StopRecording
+    ElseIf modeActif = "watching" Then
+        StopViewing
+    End If
+End Sub
+
+Sub StopViewing
+    If modeActif <> "watching" Then Exit Sub
+    AppendInfo "Arret du visionnage via VLC..."
+'	SendRC "stop"
+    CloseVLC
+    modeActif = ""
+    UpdateButtons
+    AppendInfo "Visionnage arrete."
+End Sub
+
+Sub TimerTick
+    Dim elapsed, remaining
+    If recording And Not IsVLCRunning() Then
+        AppendInfo "VLC ferme ? arret."
+        StopRecording
+        Exit Sub
+    End If
+
+    elapsed = DateDiff("s", startDate, Now)
+    remaining = durationSeconds - elapsed
+    If remaining < 0 Then remaining = 0
+    document.getElementById("bigTimer").innerText = FormatSeconds(remaining)
+
+    If elapsed >= durationSeconds Then
+        StopRecording
+        AppendInfo "Duree atteinte."
+    End If
+	
+	document.getElementById("elapsedTimer").innerText = FormatSeconds(elapsed)
+	
+End Sub
+
+Sub ResetTimer
+    document.getElementById("elapsedTimer").innerText = "00:00:00"
+    document.getElementById("bigTimer").innerText = "--:--:--"
+End Sub
+
+Function FormatSeconds(totalSeconds)
+    Dim h, m, s
+    h = totalSeconds \ 3600
+    m = (totalSeconds Mod 3600) \ 60
+    s = totalSeconds Mod 60
+    FormatSeconds = Right("0"&h,2) & ":" & Right("0"&m,2) & ":" & Right("0"&s,2)
+End Function
+
+Sub ToggleSchedule
+    Dim t
+    If scheduleEnabled Then
+        scheduleEnabled = False
+        If scheduleTimerId <> "" Then
+            window.clearInterval scheduleTimerId
+            scheduleTimerId = ""
+        End If
+        document.getElementById("scheduleBtn").innerText = "Désactivé"
+		
+		document.getElementById("scheduleBtn").style.backgroundColor = "#DDDDDD"
+		document.getElementById("scheduleBtn").style.color = "#989898"
+		
+        AppendInfo "Désactivé."
+    Else
+        t = Trim(document.getElementById("scheduleTime").value)
+        If t = "" Or InStr(t, ":") = 0 Then
+            MsgBox "Indiquez une heure au format HH:MM", 48, "Erreur"
+            Exit Sub
+        End If
+        scheduleTime = t
+        scheduleEnabled = True
+        document.getElementById("scheduleBtn").innerText = "Activé"
+
+		document.getElementById("scheduleBtn").style.backgroundColor = "#000000"
+		document.getElementById("scheduleBtn").style.color = "#FFF"
+
+        AppendInfo "Programmation activee pour " & scheduleTime
+        scheduleTimerId = window.setInterval("CheckSchedule", 10000)
+    End If
+End Sub
+
+Sub ModifierHeure
+    document.getElementById("heureAffiche").innerHTML = _
+        "<input type='text' class='saisie' style='background: #FFFFC0; width: 65px;' id='saisieHeure' onkeydown='ValiderEntreeHeure'>" & _
+        "<button class='button' style='width: 65px;' onclick='ValiderHeure'>OK</button>"
+    document.getElementById("saisieHeure").focus
+End Sub
+
+Sub ModifierMinute
+    document.getElementById("minuteAffiche").innerHTML = _
+        "<input type='text' class='saisie' style='background: #FFFFC0; width: 65px;' id='saisieMinute' onkeydown='ValiderEntreeMinute'>" & _
+        "<button class='button' style='width: 65px;' onclick='ValiderMinute'>OK</button>"
+    document.getElementById("saisieMinute").focus
+End Sub
+
+Sub ValiderEntreeHeure
+    If window.event.keyCode = 13 Then ValiderHeure
+End Sub
+
+Sub ValiderEntreeMinute
+    If window.event.keyCode = 13 Then ValiderMinute
+End Sub
+
+Sub AnnulerHeure
+	If document.getElementById("heureAffiche").contains(document.activeElement) Then Exit Sub
+	
+    Dim h
+    h = Left(document.getElementById("scheduleTime").value, 2)
+
+    document.getElementById("heureAffiche").innerHTML = _
+        "<button class='button' style='width: 138px;' onclick='ModifierHeure'>" & h & "</button>"
+End Sub
+
+Sub AnnulerMinute
+	If document.getElementById("minuteAffiche").contains(document.activeElement) Then Exit Sub
+	
+    Dim m
+    m = Right(document.getElementById("scheduleTime").value, 2)
+
+    document.getElementById("minuteAffiche").innerHTML = _
+        "<button class='button' style='width: 138px;' onclick='ModifierMinute'>" & m & "</button>"
+End Sub
+
+Sub ValiderHeure
+    Dim h
+    h = Trim(document.getElementById("saisieHeure").value)
+
+    If Not IsNumeric(h) Then Exit Sub
+    If CInt(h) < 0 Or CInt(h) > 23 Then Exit Sub
+
+    document.getElementById("scheduleTime").value = _
+        Right("0" & CInt(h), 2) & ":" & _
+        Right(document.getElementById("scheduleTime").value, 2)
+
+    document.getElementById("heureAffiche").innerHTML = _
+        "<button class='button' style='width: 138px;' onclick='ModifierHeure'>" & _
+        Right("0" & CInt(h), 2) & "</button>"
+End Sub
+
+Sub ValiderMinute
+    Dim m
+    m = Trim(document.getElementById("saisieMinute").value)
+
+    If Not IsNumeric(m) Then Exit Sub
+    If CInt(m) < 0 Or CInt(m) > 59 Then Exit Sub
+
+    document.getElementById("scheduleTime").value = _
+        Left(document.getElementById("scheduleTime").value, 2) & ":" & _
+        Right("0" & CInt(m), 2)
+
+    document.getElementById("minuteAffiche").innerHTML = _
+        "<button class='button' style='width: 138px;' onclick='ModifierMinute'>" & _
+        Right("0" & CInt(m), 2) & "</button>"
+End Sub
+
+
+
+Sub CheckSchedule
+    Dim nowH, nowM, targetH, targetM, parts
+
+    If Not scheduleEnabled Or recording Then Exit Sub
+
+    parts = Split(scheduleTime, ":")
+    If UBound(parts) < 1 Then Exit Sub
+
+    targetH = CInt(parts(0))
+    targetM = CInt(parts(1))
+
+    nowH = Hour(Now)
+    nowM = Minute(Now)
+
+    If nowH = targetH And nowM = targetM Then
+        document.getElementById("duration").value = _
+            document.getElementById("duration_prog").value
+
+        AppendInfo "Heure programmee atteinte : demarrage."
+        StartRecording
+    End If
+End Sub
+</script>
+</head>
+<body>
+
+<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 30px;">
+    <tr>
+        <td width="50%">
+            <div id="elapsedTimer">00:00:00</div>
+        </td>
+        <td width="50%">
+            <div id="bigTimer">--:--:--</div>
+        </td>
+    </tr>
+</table>
+
+
+    <div class="marge_txt">
+        <select id="channelList"  class="saisie"></select> 
+		<span class="texte_lib"> chaine TV </span>
+    </div>	
+    <div class="marge_txt">
+        <input type="text" class="saisie" style= "text-align: center;" id="duration"> 
+		<span class="texte_lib"> Durée d'enregistrement (min) </span>
+    </div>
+    <div class="buttons">
+		<button id="watchBtn" class="button" onclick="StartViewing">VOIR</button>
+		<button id="startBtn" class="button" onclick="StartRecording">ENREG</button>
+		<button id="stopBtn" class="button inactif" onclick="StopAction">STOP</button>
+		<button id="razBtn" class="button" onclick="ResetTimer">RAZ</button>
+    </div>
+
+<br>
+<fieldset>
+    <legend>Programmation</legend>
+<table width="100%" cellpadding="5" cellspacing="0" border="6" bordercolor="#CCCCCC" style="border-collapse: collapse">
+    <tr>
+        <td width="200px">
+            <label>Début</label>
+        </td>
+        <td width="110px">
+            <label>Durée (Min)</label>
+        </td>
+        <td>
+            &nbsp;
+        </td>
+    </tr>
+    <tr>
+        <td>
+			<span id="heureAffiche" onfocusout="AnnulerHeure" style="vertical-align: middle;">
+				<button class="button" style="width: 138px;" onclick="ModifierHeure">12</button>
+			</span>
+			<span class="texte_lib">H</span>
+			<span id="minuteAffiche" style="vertical-align: middle;" onfocusout="AnnulerMinute">
+				<button class="button" style="width: 138px;" onclick="ModifierMinute">00</button>
+			</span>
+			<input type="hidden" id="scheduleTime" value="12:00">
+        </td>
+        <td>
+            <input type="text" class="saisie" style="width: 90px; text-align: center;" id="duration_prog">
+        </td>
+        <td>
+            <button id="scheduleBtn" class="button" onclick="ToggleSchedule" 
+				style="backgroundColor:#DDDDDD; color:#989898" >Désactivé</button>
+			
+        </td>
+    </tr>
+</table>
+</fieldset>
+
+    <div class="marge_txt">
+        <input type="text" id="identifier" style="width:160px;" class="saisie">
+        <button id="okIdent" class="button" onclick="SaveConfig">Modifier</button>
+		<span class="texte_lib"> ID utilisateur </span>
+    </div>
+
+<fieldset>
+    <div id="info"></div>
+</fieldset>
+</body>
+</html>
