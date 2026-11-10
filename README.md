@@ -1,10 +1,8 @@
 [![iptv-live-auto-recording-hta](README/watching_cbilling.png)](https://cbilling.eu/index.php)
 
-## interface simple et intuitive pour l'enregistrement d'une chaine de TV /IPTV (diffusion en direct):
+## interface simple et intuitive pour l'enregistrement d'une émission TV avec IPTV (diffusion en direct):
 
-Télécharger puis exécuter le fichier iptv_recorder.hta
-
-idéalement: 
+Télécharger puis exécuter le fichier iptv_recorder.hta, idéalement: 
 - placer ce fichier dans un sous repertoire au choix, par exemple sur C:\PRG\IPTV_RECORDER\
 - créer un raccourcis du fichier et coller le raccourcis sur votre bureau Windows puis double cliquer
 
