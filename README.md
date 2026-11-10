@@ -1,32 +1,36 @@
 
 
-## Script hta pour enregistrement video en direct:
+## interface simple et intuitive pour enregistre une chaine TV /IPTV (diffusion en direct):
 
-Ce script permet d'enregistrer les chaines TV / IPTV en parfaite qualité d'image et poids de fichier de sortie MP4, optimisation parfaite, 
-aucun paramètre à saisir comme dans OBS (codec, nombre d'images par secondes, définition etc).
+Ce script permet d'enregistrer une émission TV en qualité d'image parfaite, et avec poids de fichier de sortie MP4 léger. 
+aucun paramètre n'est à saisir, comme c'est le cas dans OBS (codec, nombre d'images par secondes, définition etc).
 
-- conçu pour un pack TV de Cbilling (https://cbilling.eu/?mode=auth), abonnement à 3 euros /mois.
-- nécessite une installation de VLC et de laisser l'ordinateur allumé pour l'enregistrement
-- sortie en MP4 à copier directement sur clef USB en entrée USB du lecteur BlueRay.
-- Durée d'enregistrement obligatoire à saisir en parametre à l'écran
-- possibilité de programmer un début d'enregistrement et d'activer ou désactiver cette programmation.
-- comment trouver l'identifiant IPTV CBILLING: ouvrir la liste de lecture,
-  choisir une chaine puis "propriétés", noter l'identifiant dans l'URL
-  (ce n'est pas l'identifiant de l'utilisateur ni l'identifiant du pack)
+- conçu pour un pack TV de Cbilling, abonnement à 3 euros /mois: https://cbilling.eu/?mode=auth
+- nécessite VLC installé sur l'ordinateur qui doit rester allumé pour traiter les enregistrements
+- fichier de sortie MP4, à copier manuellement ensuite sur clef USB à destination du port USB sur lecteur BlueRay de salon.
+- Durée d'enregistrement modifiable en parametre à l'écran
+- possibilité de programmer un début d'enregistrement, à désactiver ou réactiver à volonté selon les besoins.
+- comment trouver votre identifiant IPTV Cbilling: ouvrir la liste de lecture,
+  choisir une chaine puis "propriétés", noter l'identifiant à la fin de l'URL affichée tout en bas
+  (il ne s'agit pas de l'identifiant de l'utilisateur, ni de l'identifiant du pack)
 
   
-avantages: 
+objectif et avantages: 
 - enregistrer une emission TV
 - programmer un enregistrement automatique
 - Disposer d'un fichier de sortie optimisé avec qualité d'image parfaite
 - aucun réglage technique, tout est automatique
 
-versions future: 
+versions future / évolution du projet: 
 - modifier le nom de fichier et la destination (par exemple déposer le fichier de sortie directement sur clef USB)
 - calendrier pour la programmation
 - ajouter / supprimer un programme, liste des programmes
-- à distance: ajouter un programme et l'activer
+- pilotage à distance: ajouter un programme et l'activer
+- Gestion des abonnements IPTV et des chaines (autres que cbilling)
+- autres évolutions...
 
-  
+  Ce projet de script est à adapter selon votre besoin, sa base reste explmoitable pour fonctionner avec une liste de lecture autre que Cbilling (chaines TV russophones, y compris Ukraine)
+
+  Je suis revendeur de pack TV Cbilling, je fournis également des terminaux avec telecommande à raccorder sur votre TV, affichage en direct des chaines TV IPTV au démarrage et possibilité de zapper directement avec votre telecommandes et touches numerotées, comme sur un tunner TV classique. Je fournis également des routeurs prééquipés VPN pour diffuser en WIFI + cable ethernet la connection sécurisée sous VPN, (performances internes, mémoire vive, débit de transfert) permettant le streamming et visionnage TV, sans systeme android (donc stabilité constante, aucune mise à jour nécessaire ni recherche de mise à jour)
 
 ---
