@@ -18,9 +18,9 @@ objectif d'utilisation et avantages:
 - Fichier de sortie optimisé avec une qualité d'image parfaite
 - aucun réglage technique, tout est automatique...  (codec, nombre d'images par secondes, définition d'image, etc...).
 
-Télécharger puis exécuter le fichier iptv_recorder.hta : 
-- placer [le fichier](https://github.com/pounichka59/iptv-live-auto-recording-hta/blob/main/iptv_recorder.hta) (cliquer sur "Download" pour le télécharger) dans un sous repertoire de votre choix, par exemple dans  C:\PRG\IPTV_RECORDER\
-- créer un raccourcis du fichier et coller le raccourcis sur votre bureau Windows puis double cliquer
+Utilisation du script : 
+- cliquez sur "Download" pour télécharger [ce fichier](https://github.com/pounichka59/iptv-live-auto-recording-hta/blob/main/iptv_recorder.hta) puis déposez-le dans un sous repertoire de votre choix, par exemple dans  C:\PRG\IPTV_RECORDER\
+- créer un raccourcis du fichier, coller le raccourcis sur votre bureau Windows puis double cliquer
 
 [![iptv-live-auto-recording-hta](README/watching_cbilling.png)](https://cbilling.eu/index.php)
 
