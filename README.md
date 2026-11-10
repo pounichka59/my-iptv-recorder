@@ -6,6 +6,8 @@ Télécharger puis exécuter le fichier iptv_recorder.hta, idéalement:
 - placer [ ce fichier ](https://github.com/pounichka59/iptv-live-auto-recording-hta/raw/refs/heads/main/iptv_recorder.hta?download=1) dans un sous repertoire au choix, par exemple sur C:\PRG\IPTV_RECORDER\
 - créer un raccourcis du fichier et coller le raccourcis sur votre bureau Windows puis double cliquer
 
+[Télécharger iptv_recorder.hta](https://github.com/pounichka59/iptv-live-auto-recording-hta/blob/main/iptv_recorder.hta)
+
 Ce script vous permet d'enregistrer vos émissions TV favorites en qualité d'image impeccable  avec un fichier de sortie MP4 relativement léger (optimisation parfaite, moins de 700Mo /H possible). 
 
 - conçu pour un pack TV de Cbilling (https://cbilling.eu)
