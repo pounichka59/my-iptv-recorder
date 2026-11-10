@@ -22,6 +22,8 @@ objectif d'utilisation et avantages:
 - Fichier de sortie optimisé avec une qualité d'image parfaite
 - aucun réglage technique, tout est automatique...  (codec, nombre d'images par secondes, définition d'image, etc...).
 
+[![iptv-live-auto-recording-hta](README/logo-f.png)](https://cbilling.eu/index.php)
+
 projet d'évolution du script: 
 - modifier le nom de fichier et son emplacement (par exemple pour générer le fichier de sortie directement sur clef USB)
 - systeme de calendrier de sélection du jour pour la programmation
