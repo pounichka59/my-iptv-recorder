@@ -30,10 +30,12 @@ projet d'évolution du script:
 - Gestion des abonnements IPTV et des chaines (autres que Cbilling)
 - autres évolutions...
 
-  Ce projet de script est à adapter selon votre besoin, sa base reste explmoitable pour fonctionner avec n'immorte quelle liste de lecture (pas uniquement Cbilling qui est fournisseur proposant exclusivement des chaines TV russophones, y compris Ukraine)
+  Vous pouvez modifier ce script dont je suis l'auteur pour l'adapter selon vos besoins, sa conception permet de traiter généralement n'immorte quelle liste de lecture IPTV (pas uniquement Cbilling)
 
-Je suis revendeur de pack TV Cbilling, vous pouvez me contacter pour vous délivrer un abonnement. Je fournis également des terminaux à brancher directement sur un port HDMI de votre TV, ce qui permet de disposer d'un affichage direct en plein écran des chaines TV de votre abonnement (immédiatement au démarrage, sans passer par un menu comme c'est généralement le cas sur la pluspart des lecteurs multimédia) , puis possibilité de zapper avec votre telecommandes et ses touches numerotées (utilisation immediate, comme sur un tunner TV classique). Il suffit de brancher, allumer, utiliser.
+Revendeur de pack TV Cbilling, vous pouvez me contacter pour tout abonnement. Je fournis également des terminaux à raccorder directement sur votre téléviseur, proposant un affichage direct en plein écran des chaines TV de votre abonnement (immédiatement au démarrage, sans passer par un menu, comme avec un lecteurs multimédia classique) , puis offrant la possibilité de zapper par telecommande avec touches numerotées (utilisation simple et fonctionnelle comme sur un tunner TV classique). Il ne suffit que de brancher, allumer, utiliser.
 
-Pour vos besoins multimedia je fournis également des routeurs pré-équipés VPN pour diffuser en WIFI ainsi que par cable réseau (cable ethernet) une connection sécurisée sous VPN, ce maérériel convient pour le streamming et visionnage TV, ne contient pas de systeme android embarqué (donc fonctionnement stable et constant, absence de nécessité de mise à jour, ni aucun changement dans la durée) - 
+Pour vos besoins multimedia je propose aussi à la vente des routeurs pré-équipés VPN pour diffuser en WIFI ainsi que par cable réseau (cable ethernet) une connection sécurisée sous VPN, ce maérériel convient pour le streamming et visionnage TV, ne contient pas de systeme android embarqué (donc fonctionnement stable et constant, absence de nécessité de mise à jour, ni aucun changement dans la durée). 
+
+Sylvain DANGEL / PrestAzur.fr
 
 ---
