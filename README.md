@@ -33,7 +33,9 @@ projet d'évolution du script:
 - Gestion des abonnements IPTV et des chaines (autres que Cbilling)
 - autres évolutions...
 
-  Vous pouvez modifier ce script dont je suis l'auteur pour l'adapter selon vos besoins, sa conception permet de traiter généralement n'immorte quelle liste de lecture IPTV (pas uniquement Cbilling)
+Vous pouvez modifier ce script dont je suis l'auteur pour l'adapter selon vos besoins, sa conception permet de traiter généralement n'immorte quelle liste de lecture IPTV (pas uniquement Cbilling)
+
+---
 
 Revendeur de pack TV Cbilling, vous pouvez me contacter pour tout abonnement. Je fournis également des terminaux à raccorder directement sur votre téléviseur, proposant un affichage direct en plein écran des chaines TV de votre abonnement (immédiatement au démarrage, sans passer par un menu, comme avec un lecteurs multimédia classique) , puis offrant la possibilité de zapper par telecommande avec touches numerotées (utilisation simple et fonctionnelle comme sur un tunner TV classique). Il ne suffit que de brancher, allumer, utiliser.
 
