@@ -3,7 +3,7 @@
 ## interface simple et intuitive pour enregistre une chaine TV /IPTV (diffusion en direct):
 
 Ce script permet d'enregistrer une émission TV en qualité d'image parfaite, et avec poids de fichier de sortie MP4 le plus léger possible (environ 600Mo /H d'enregistrement avec une définition d'image  suffisamment nette comme sur une chaine de TV classique). 
-aucun paramètre n'est à saisir, comme c'est le cas dans OBS (codec, nombre d'images par secondes, définition etc).
+Facilité de mise en place et d'utilisation: aucun paramètre technique à renseigner (codec, nombre d'images par secondes, définition etc).
 
 - conçu pour un pack TV de Cbilling, abonnement à 3 euros /mois: https://cbilling.eu/?mode=auth
 - nécessite VLC installé sur l'ordinateur qui doit rester allumé pour traiter les enregistrements
