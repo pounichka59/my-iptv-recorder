@@ -8,7 +8,7 @@ Télécharger puis exécuter le fichier iptv_recorder.hta, idéalement:
 
 Ce script vous permet d'enregistrer vos émissions TV favorites en qualité d'image impeccable  avec un fichier de sortie MP4 relativement léger (optimisation parfaite, moins de 700Mo /H possible). 
 
-- conçu pour un pack TV de Cbilling, abonnement: https://cbilling.eu
+- conçu pour un pack TV de Cbilling (https://cbilling.eu)
 - nécessite VLC installé sur l'ordinateur.
 - fichier de sortie MP4, à copier ensuite sur une clef USB à destination du port USB sur lecteur BlueRay de salon.
 - Durée d'enregistrement modifiable en parametre à l'écran
