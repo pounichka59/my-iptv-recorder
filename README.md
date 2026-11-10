@@ -2,6 +2,12 @@
 
 ## interface simple et intuitive pour l'enregistrement d'une chaine de TV /IPTV (diffusion en direct):
 
+Télécharger puis exécuter le fichier iptv_recorder.hta
+
+idéalement: 
+- placer ce fichier dans un sous repertoire au choix, par exemple sur C:\PRG\IPTV_RECORDER\
+- créer un raccourcis du fichier et coller le raccourcis sur votre bureau Windows puis double cliquer
+
 Ce script permet d'enregistrer une émission TV en qualité d'image impeccable, et avec un poids de fichier de sortie MP4 raisonnable (optimisation parfaite). 
 
 - conçu pour un pack TV de Cbilling, abonnement: https://cbilling.eu
