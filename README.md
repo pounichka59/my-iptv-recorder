@@ -1,10 +1,10 @@
-
+[![iptv-live-auto-recording-hta](README/watching_cbilling.png)](https://cbilling.eu/index.php)
 
 ## interface simple et intuitive pour l'enregistrement d'une chaine de TV /IPTV (diffusion en direct):
 
 Ce script permet d'enregistrer une émission TV en qualité d'image impeccable, et avec un poids de fichier de sortie MP4 raisonnable (optimisation parfaite). 
 
-- conçu pour un pack TV de Cbilling, abonnement: https://cbilling.eu/?mode=auth
+- conçu pour un pack TV de Cbilling, abonnement: https://cbilling.eu
 - nécessite VLC installé sur l'ordinateur.
 - fichier de sortie MP4, à copier ensuite sur une clef USB à destination du port USB sur lecteur BlueRay de salon.
 - Durée d'enregistrement modifiable en parametre à l'écran
