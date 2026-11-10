@@ -6,7 +6,7 @@ Télécharger puis exécuter le fichier iptv_recorder.hta, idéalement:
 - placer ce fichier dans un sous repertoire au choix, par exemple sur C:\PRG\IPTV_RECORDER\
 - créer un raccourcis du fichier et coller le raccourcis sur votre bureau Windows puis double cliquer
 
-Ce script vous permet d'enregistrer vos émissions TV favorites en qualité d'image impeccable  avec un pfichier de sortie MP4 d'un poids raisonnable (optimisation parfaite, moins de 700Mo /H possible). 
+Ce script vous permet d'enregistrer vos émissions TV favorites en qualité d'image impeccable  avec un fichier de sortie MP4 relativement léger (optimisation parfaite, moins de 700Mo /H possible). 
 
 - conçu pour un pack TV de Cbilling, abonnement: https://cbilling.eu
 - nécessite VLC installé sur l'ordinateur.
