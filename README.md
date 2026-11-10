@@ -2,9 +2,8 @@
 
 ## interface simple et intuitive pour l'enregistrement d'une émission TV avec IPTV (diffusion en direct):
 
-Télécharger puis exécuter le fichier iptv_recorder.hta, 
-idéalement: 
-- placer [le fichier](https://github.com/pounichka59/iptv-live-auto-recording-hta/blob/main/iptv_recorder.hta) (cliquer sur "Download" pour le télécharger) dans un sous repertoire de votre choix, par exemple sur  C:\PRG\IPTV_RECORDER\
+Télécharger puis exécuter le fichier iptv_recorder.hta : 
+- placer [le fichier](https://github.com/pounichka59/iptv-live-auto-recording-hta/blob/main/iptv_recorder.hta) (cliquer sur "Download" pour le télécharger) dans un sous repertoire de votre choix, par exemple dans  C:\PRG\IPTV_RECORDER\
 - créer un raccourcis du fichier et coller le raccourcis sur votre bureau Windows puis double cliquer
 
 Ce script vous permet d'enregistrer vos émissions TV favorites en qualité d'image impeccable  avec un fichier de sortie MP4 relativement léger (optimisation parfaite, moins de 700Mo /H possible). 
