@@ -35,7 +35,7 @@ projet d'évolution du script:
 
 Vous pouvez modifier ce script dont je suis l'auteur pour l'adapter selon vos besoins, sa conception permet de traiter généralement n'immorte quelle liste de lecture IPTV (pas uniquement Cbilling)
 
-  Sylvain DANGEL / PrestAzur.fr
+  Sylvain DANGEL / [PrestAzur.fr](https://www.prestazur.fr/)
 ---
 
 Revendeur de pack TV Cbilling, vous pouvez me contacter pour tout abonnement. Je fournis également des terminaux à raccorder directement sur votre téléviseur, proposant un affichage direct en plein écran des chaines TV de votre abonnement (immédiatement au démarrage, sans passer par un menu comme celà se produit généralement sur tout lecteurs multimédia que vous trouverez dans le commerce), puis offrant la possibilité de zapper par telecommande munie de touches numerotées (utilisation simple et fonctionnelle comme avec un tunner TV classique). En résumé: branchez, allumez, utilisez. Fini les prises de tete.
