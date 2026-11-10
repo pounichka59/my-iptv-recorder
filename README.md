@@ -35,12 +35,9 @@ projet d'évolution du script:
 
 Vous pouvez modifier ce script dont je suis l'auteur pour l'adapter selon vos besoins, sa conception permet de traiter généralement n'immorte quelle liste de lecture IPTV (pas uniquement Cbilling)
 
+  Sylvain DANGEL / PrestAzur.fr
 ---
 
 Revendeur de pack TV Cbilling, vous pouvez me contacter pour tout abonnement. Je fournis également des terminaux à raccorder directement sur votre téléviseur, proposant un affichage direct en plein écran des chaines TV de votre abonnement (immédiatement au démarrage, sans passer par un menu, comme avec un lecteurs multimédia classique) , puis offrant la possibilité de zapper par telecommande avec touches numerotées (utilisation simple et fonctionnelle comme sur un tunner TV classique). Il ne suffit que de brancher, allumer, utiliser.
 
 Pour vos besoins multimedia je propose aussi à la vente des routeurs pré-équipés VPN pour diffuser en WIFI ainsi que par cable réseau (cable ethernet) une connection sécurisée sous VPN, ce maérériel convient pour le streamming et visionnage TV, ne contient pas de systeme android embarqué (donc fonctionnement stable et constant, absence de nécessité de mise à jour, ni aucun changement dans la durée). 
-
-Sylvain DANGEL / PrestAzur.fr
-
----
