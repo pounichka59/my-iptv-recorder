@@ -1,9 +1,8 @@
 
 
-## interface simple et intuitive pour enregistre une chaine TV /IPTV (diffusion en direct):
+## interface simple et intuitive pour l'enregistrement d'une chaine de TV /IPTV (diffusion en direct):
 
-Ce script permet d'enregistrer une émission TV en qualité d'image parfaite, et avec poids de fichier de sortie MP4 le plus léger possible (environ 600Mo /H d'enregistrement avec une définition d'image  suffisamment nette comme sur une chaine de TV classique). 
-Facilité de mise en place et d'utilisation: aucun paramètre technique à renseigner (codec, nombre d'images par secondes, définition etc).
+Ce script permet d'enregistrer une émission TV en qualité d'image impeccable, et avec un poids de fichier de sortie MP4 raisonnable (optimisation parfaite). 
 
 - conçu pour un pack TV de Cbilling, abonnement à 3 euros /mois: https://cbilling.eu/?mode=auth
 - nécessite VLC installé sur l'ordinateur qui doit rester allumé pour traiter les enregistrements
@@ -19,7 +18,7 @@ objectif et avantages:
 - enregistrer une emission TV
 - programmer un enregistrement automatique
 - Disposer d'un fichier de sortie optimisé avec qualité d'image parfaite
-- aucun réglage technique, tout est automatique
+- aucun réglage technique, tout est automatique...  (codec, nombre d'images par secondes, définition d'image, etc...).
 
 versions future / évolution du projet: 
 - modifier le nom de fichier et la destination (par exemple déposer le fichier de sortie directement sur clef USB)
