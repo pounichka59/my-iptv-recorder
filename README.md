@@ -4,7 +4,7 @@
 
 Ce script permet d'enregistrer une émission TV en qualité d'image impeccable, et avec un poids de fichier de sortie MP4 raisonnable (optimisation parfaite). 
 
-- conçu pour un pack TV de Cbilling, abonnement à 3 euros /mois: https://cbilling.eu/?mode=auth
+- conçu pour un pack TV de Cbilling, abonnement: https://cbilling.eu/?mode=auth
 - nécessite VLC installé sur l'ordinateur qui doit rester allumé pour traiter les enregistrements
 - fichier de sortie MP4, à copier manuellement ensuite sur clef USB à destination du port USB sur lecteur BlueRay de salon.
 - Durée d'enregistrement modifiable en parametre à l'écran
