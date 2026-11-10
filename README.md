@@ -12,7 +12,7 @@ Ce script vous permet d'enregistrer vos émissions TV favorites en qualité d'im
 - nécessite VLC installé sur l'ordinateur.
 - fichier de sortie MP4, à copier ensuite sur une clef USB à destination du port USB sur lecteur BlueRay de salon.
 - Durée d'enregistrement modifiable en parametre à l'écran
-- possibilité de programmer un début d'enregistrement, à désactiver ou réactiver à volonté selon les besoins.
+- possibilité de programmer un début d'enregistrement, à désactiver ou réactiver à volonté selon vos besoins.
 
   
 objectif d'utilisation et avantages: 
