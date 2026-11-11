@@ -34,7 +34,6 @@
     text-align: center;
     color: #008000;
     background: #ffffff;
-    border: 3px solid #008000;
     padding: 0px;
 }
 
@@ -44,15 +43,17 @@
     text-align: center;
     color: #CB4127;
     background: #ffffff;
-    border: 3px solid #CB4127;
     padding: 0px;
 }
 	
-    #info {
-        font-family: Consolas, monospace; background: #eeeeee;
-        padding: 10px; min-height: 120px; white-space: pre-wrap;
-    }
-
+#info {
+    font-family: Consolas, monospace;
+    background: #eeeeee;
+    padding: 10px;
+    height: 110px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+}
 	
 	
 .button {
@@ -120,13 +121,16 @@ button {
 <script language="VBScript">
 Const VLC_PATH = "C:\Program Files\VideoLAN\VLC\vlc.exe"
 Const URL_BASE = "http://s04.wsbof.com:8080/s/"
-Const DEFAULT_IDENTIFIER = ""
+Const DEFAULT_IDENTIFIER = "" 
 Const RC_PORT = "4212"
+Const RECORD_DIR = "C:\Enregistrements"
 
 Dim channels, recording, startDate, durationSeconds, timerId
 Dim scheduleEnabled, scheduleTime, scheduleTimerId
 Dim configFile
 Dim modeActif
+Dim scheduleDate
+Dim calendarMonth, calendarYear
 
 '	https://cbilling.eu/index.php?mode=idx
 
@@ -136,23 +140,36 @@ channels = Array( _
     "ru-tv.m3u8", "muz-tv.m3u8", "inter-ua.m3u8", "1-plus-1.m3u8", _
     "2-plus-2-ua.m3u8", "ictv-ua.m3u8", "kus-kus-ua.m3u8", _
     "novyj-kanal-ua.m3u8", "stb-ua.m3u8", "ntn-ua.m3u8", "24ch-ua.m3u8" _
-)
+
+
 
 Sub Window_OnLoad
-	window.resizeTo 720, 650
+
+    window.resizeTo 720, 650
+
     Dim i, suffix, label, optionItem, fso
+
     recording = False
     timerId = ""
     scheduleEnabled = False
     scheduleTimerId = ""
     scheduleTime = ""
-	modeActif = ""
-	document.getElementById("elapsedTimer").innerText = "00:00:00"
+    modeActif = ""
+
+    document.getElementById("elapsedTimer").innerText = "00:00:00"
+
+    document.getElementById("identifier").value = DEFAULT_IDENTIFIER
+    document.getElementById("duration").value = "60"
+    document.getElementById("duration_prog").value = "90"
+    document.getElementById("scheduleTime").value = "12:00"
+
+    scheduleDate = Date
 
     Set fso = CreateObject("Scripting.FileSystemObject")
-    configFile = fso.GetParentFolderName(location.pathname) & "\iptv_recorder.json"
+    configFile = fso.GetParentFolderName(location.pathname) & "\magneto.json"
 
     document.getElementById("channelList").innerHTML = ""
+
     For i = 0 To UBound(channels)
         suffix = channels(i)
         label = Replace(suffix, ".m3u8", "")
@@ -162,44 +179,174 @@ Sub Window_OnLoad
         document.getElementById("channelList").add optionItem
     Next
 
-    document.getElementById("identifier").value = DEFAULT_IDENTIFIER
     LoadConfig
-    document.getElementById("duration").value = "60"
-	document.getElementById("duration_prog").value = "90"
-	document.getElementById("scheduleTime").value = "12:00"
-	
+	ActualiserHeure
+
+    ActualiserDate
+
+    If scheduleEnabled Then
+
+        document.getElementById("scheduleBtn").innerText = "ON"
+        document.getElementById("scheduleBtn").style.backgroundColor = "#000000"
+        document.getElementById("scheduleBtn").style.color = "#FFF"
+
+        scheduleTimerId = window.setInterval("CheckSchedule", 10000)
+
+    Else
+
+        document.getElementById("scheduleBtn").innerText = "OFF"
+        document.getElementById("scheduleBtn").style.backgroundColor = "#DDDDDD"
+        document.getElementById("scheduleBtn").style.color = "#989898"
+
+    End If
+
     UpdateButtons
     UpdateInfo "Pret." & vbCrLf & "Interface RC (127.0.0.1:" & RC_PORT & ")"
+
 End Sub
 
+
+
+Function JsonValue(content, key)
+
+    Dim re, matches
+
+    Set re = CreateObject("VBScript.RegExp")
+
+    re.Global = False
+    re.IgnoreCase = True
+    re.Pattern = """" & key & """\s*:\s*(""[^""]*""|true|false|[0-9]+)"
+
+    Set matches = re.Execute(content)
+
+    If matches.Count > 0 Then
+        JsonValue = matches(0).SubMatches(0)
+        JsonValue = Replace(JsonValue, """", "")
+    Else
+        JsonValue = ""
+    End If
+
+End Function
+
+
+
 Sub LoadConfig
-    Dim fso, ts, content, id
+
+    Dim fso, ts, content, v, h, m
+
     On Error Resume Next
+
     Set fso = CreateObject("Scripting.FileSystemObject")
+
     If fso.FileExists(configFile) Then
+
         Set ts = fso.OpenTextFile(configFile, 1)
         content = ts.ReadAll
         ts.Close
-        id = Trim(Replace(Replace(content, "{", ""), "}", ""))
-        id = Trim(Replace(id, """identifier"":", ""))
-        id = Trim(Replace(id, """", ""))
-        If id <> "" Then document.getElementById("identifier").value = id
+
+        ' Identifiant utilisateur
+        v = JsonValue(content, "identifier")
+        If v <> "" Then
+            document.getElementById("identifier").value = v
+        End If
+
+        ' Date programmee
+        v = JsonValue(content, "scheduleDate")
+
+        If Len(v) = 10 Then
+            If Mid(v, 5, 1) = "-" And Mid(v, 8, 1) = "-" Then
+                scheduleDate = DateSerial( _
+                    CInt(Left(v, 4)), _
+                    CInt(Mid(v, 6, 2)), _
+                    CInt(Right(v, 2)))
+            End If
+        End If
+
+        ' Heure et minutes programmees
+        h = JsonValue(content, "scheduleHour")
+        m = JsonValue(content, "scheduleMinute")
+
+        If IsNumeric(h) And IsNumeric(m) Then
+
+            If CInt(h) >= 0 And CInt(h) <= 23 And _
+               CInt(m) >= 0 And CInt(m) <= 59 Then
+
+                document.getElementById("scheduleTime").value = _
+                    Right("0" & CInt(h), 2) & ":" & _
+                    Right("0" & CInt(m), 2)
+
+            End If
+
+        End If
+
+        ' Duree programmee
+        v = JsonValue(content, "duration_prog")
+
+        If IsNumeric(v) Then
+            If CDbl(v) > 0 Then
+                document.getElementById("duration_prog").value = v
+            End If
+        End If
+
+        ' Activation de la programmation
+        v = JsonValue(content, "scheduleEnabled")
+
+        If LCase(v) = "true" Then
+            scheduleEnabled = True
+        Else
+            scheduleEnabled = False
+        End If
+
     End If
+
     On Error GoTo 0
+
+    ActualiserDate
+
 End Sub
 
+
+
+
 Sub SaveConfig
-    Dim fso, ts, id
+
+    Dim fso, ts, id, d, h, m, duree, actif
+
     id = Trim(document.getElementById("identifier").value)
-    If id = "" Then Exit Sub
+
+    d = Year(scheduleDate) & "-" & _
+        Right("0" & Month(scheduleDate), 2) & "-" & _
+        Right("0" & Day(scheduleDate), 2)
+
+    h = Left(document.getElementById("scheduleTime").value, 2)
+    m = Right(document.getElementById("scheduleTime").value, 2)
+
+    duree = document.getElementById("duration_prog").value
+
+    If scheduleEnabled Then
+        actif = "true"
+    Else
+        actif = "false"
+    End If
+
     On Error Resume Next
+
     Set fso = CreateObject("Scripting.FileSystemObject")
     Set ts = fso.CreateTextFile(configFile, True)
-    ts.Write "{""identifier"":""" & id & """}"
+
+    ts.Write "{""identifier"":""" & id & """," & _
+             """scheduleEnabled"":" & actif & "," & _
+             """scheduleDate"":""" & d & """," & _
+             """scheduleHour"":" & h & "," & _
+             """scheduleMinute"":" & m & "," & _
+             """duration_prog"":" & duree & "}"
+
     ts.Close
+
     On Error GoTo 0
-    AppendInfo "Identifiant sauvegarde."
+
 End Sub
+
 
 
 Sub UpdateButtons
@@ -240,6 +387,24 @@ Sub UpdateButtons
 
 End Sub
 
+
+Sub ActualiserHeure
+
+    Dim h, m
+
+    h = Left(document.getElementById("scheduleTime").value, 2)
+    m = Right(document.getElementById("scheduleTime").value, 2)
+
+    document.getElementById("heureAffiche").innerHTML = _
+        "<button class='button' style='width:138px;' onclick='ModifierHeure'>" & h & "</button>"
+
+    document.getElementById("minuteAffiche").innerHTML = _
+        "<button class='button' style='width:138px;' onclick='ModifierMinute'>" & m & "</button>"
+
+End Sub
+
+
+
 Sub StartViewing
 
     Dim shell, identifier, channel, url
@@ -261,9 +426,9 @@ Sub StartViewing
 
     Set shell = CreateObject("WScript.Shell")
 
-    CloseVLC
+CloseVLC
 
-    UpdateInfo "Lancement de VLC en mode visionnage..."
+UpdateInfo "Lancement de VLC en mode visionnage..."
 
     shell.Run """" & VLC_PATH & """ """ & url & """ --extraintf=rc --rc-host=127.0.0.1:" & RC_PORT & " --rc-quiet", 1, False
 
@@ -280,7 +445,10 @@ Sub UpdateInfo(text)
 End Sub
 
 Sub AppendInfo(text)
-    document.getElementById("info").innerText = document.getElementById("info").innerText & vbCrLf & text
+    Dim info
+    Set info = document.getElementById("info")
+    info.innerText = info.innerText & vbCrLf & text
+    info.scrollTop = info.scrollHeight
 End Sub
 
 Function IsVLCRunning()
@@ -336,9 +504,10 @@ Sub StartRecording
 
     Set shell = CreateObject("WScript.Shell")
 
-    CloseVLC
+CloseVLC
 
-    UpdateInfo "Lancement de VLC avec interface RC..."
+UpdateInfo "Lancement de VLC avec interface RC..."
+	
     shell.Run """" & VLC_PATH & """ """ & url & """ --extraintf=rc --rc-host=127.0.0.1:" & RC_PORT & " --rc-quiet", 1, False
 
     ' Envoie la commande pour démarrer l'enregistrement
@@ -414,6 +583,7 @@ End Sub
 Sub ResetTimer
     document.getElementById("elapsedTimer").innerText = "00:00:00"
     document.getElementById("bigTimer").innerText = "--:--:--"
+    document.getElementById("info").innerText = ""
 End Sub
 
 Function FormatSeconds(totalSeconds)
@@ -432,12 +602,12 @@ Sub ToggleSchedule
             window.clearInterval scheduleTimerId
             scheduleTimerId = ""
         End If
-        document.getElementById("scheduleBtn").innerText = "Désactivé"
+        document.getElementById("scheduleBtn").innerText = "OFF"
 		
 		document.getElementById("scheduleBtn").style.backgroundColor = "#DDDDDD"
 		document.getElementById("scheduleBtn").style.color = "#989898"
 		
-        AppendInfo "Désactivé."
+        AppendInfo "Programmation désactivée"
     Else
         t = Trim(document.getElementById("scheduleTime").value)
         If t = "" Or InStr(t, ":") = 0 Then
@@ -446,7 +616,7 @@ Sub ToggleSchedule
         End If
         scheduleTime = t
         scheduleEnabled = True
-        document.getElementById("scheduleBtn").innerText = "Activé"
+        document.getElementById("scheduleBtn").innerText = "ON"
 
 		document.getElementById("scheduleBtn").style.backgroundColor = "#000000"
 		document.getElementById("scheduleBtn").style.color = "#FFF"
@@ -454,18 +624,19 @@ Sub ToggleSchedule
         AppendInfo "Programmation activee pour " & scheduleTime
         scheduleTimerId = window.setInterval("CheckSchedule", 10000)
     End If
+	SaveConfig
 End Sub
 
 Sub ModifierHeure
     document.getElementById("heureAffiche").innerHTML = _
-        "<input type='text' class='saisie' style='background: #FFFFC0; width: 65px;' id='saisieHeure' onkeydown='ValiderEntreeHeure'>" & _
+        "<input type='text' class='saisie' style='background: #FFFFD9; width: 65px;' id='saisieHeure' onkeydown='ValiderEntreeHeure'>" & _
         "<button class='button' style='width: 65px;' onclick='ValiderHeure'>OK</button>"
     document.getElementById("saisieHeure").focus
 End Sub
 
 Sub ModifierMinute
     document.getElementById("minuteAffiche").innerHTML = _
-        "<input type='text' class='saisie' style='background: #FFFFC0; width: 65px;' id='saisieMinute' onkeydown='ValiderEntreeMinute'>" & _
+        "<input type='text' class='saisie' style='background: #FFFFD9; width: 65px;' id='saisieMinute' onkeydown='ValiderEntreeMinute'>" & _
         "<button class='button' style='width: 65px;' onclick='ValiderMinute'>OK</button>"
     document.getElementById("saisieMinute").focus
 End Sub
@@ -512,6 +683,7 @@ Sub ValiderHeure
     document.getElementById("heureAffiche").innerHTML = _
         "<button class='button' style='width: 138px;' onclick='ModifierHeure'>" & _
         Right("0" & CInt(h), 2) & "</button>"
+	SaveConfig
 End Sub
 
 Sub ValiderMinute
@@ -528,32 +700,300 @@ Sub ValiderMinute
     document.getElementById("minuteAffiche").innerHTML = _
         "<button class='button' style='width: 138px;' onclick='ModifierMinute'>" & _
         Right("0" & CInt(m), 2) & "</button>"
+	SaveConfig
 End Sub
 
 
 
+
 Sub CheckSchedule
-    Dim nowH, nowM, targetH, targetM, parts
+
+    Dim targetH, targetM, parts, targetDateTime
 
     If Not scheduleEnabled Or recording Then Exit Sub
 
     parts = Split(scheduleTime, ":")
+
     If UBound(parts) < 1 Then Exit Sub
 
     targetH = CInt(parts(0))
     targetM = CInt(parts(1))
 
-    nowH = Hour(Now)
-    nowM = Minute(Now)
+    targetDateTime = DateSerial( _
+        Year(scheduleDate), _
+        Month(scheduleDate), _
+        Day(scheduleDate)) + TimeSerial(targetH, targetM, 0)
 
-    If nowH = targetH And nowM = targetM Then
+    If Now >= targetDateTime Then
+
+        ' Desactiver la programmation
+        scheduleEnabled = False
+
+        If scheduleTimerId <> "" Then
+            window.clearInterval scheduleTimerId
+            scheduleTimerId = ""
+        End If
+
+        document.getElementById("scheduleBtn").innerText = "Inactif"
+        document.getElementById("scheduleBtn").style.backgroundColor = "#DDDDDD"
+        document.getElementById("scheduleBtn").style.color = "#989898"
+
         document.getElementById("duration").value = _
             document.getElementById("duration_prog").value
 
-        AppendInfo "Heure programmee atteinte : demarrage."
+        AppendInfo "Date et heure programmees atteintes : demarrage."
+
         StartRecording
+
     End If
+
 End Sub
+
+
+
+Sub ModifierDureeEnreg
+
+    document.getElementById("dureeEnregAffiche").innerHTML = _
+        "<input type='text' class='saisie' style='width:90px; background:#FFFFD9; text-align:center;' id='saisieDureeEnreg' onkeydown='ValiderEntreeDureeEnreg'>" & _
+        "<button class='button' style='width:65px;' onclick='ValiderDureeEnreg'>OK</button>"
+
+    document.getElementById("saisieDureeEnreg").focus
+
+End Sub
+
+
+Sub ValiderEntreeDureeEnreg
+
+    If window.event.keyCode = 13 Then ValiderDureeEnreg
+
+End Sub
+
+
+Sub ValiderDureeEnreg
+
+    Dim d
+
+    d = Trim(document.getElementById("saisieDureeEnreg").value)
+
+    If Not IsNumeric(d) Then Exit Sub
+    If CDbl(d) <= 0 Then Exit Sub
+
+    document.getElementById("duration").value = d
+
+    document.getElementById("dureeEnregAffiche").innerHTML = _
+        "<button class='button' style='width:160px;' onclick='ModifierDureeEnreg'>" & d & "</button>"
+
+End Sub
+
+
+Sub AnnulerDureeEnreg
+
+    If document.getElementById("dureeEnregAffiche").contains(document.activeElement) Then Exit Sub
+
+    Dim d
+
+    d = document.getElementById("duration").value
+
+    document.getElementById("dureeEnregAffiche").innerHTML = _
+        "<button class='button' style='width:160px;' onclick='ModifierDureeEnreg'>" & d & "</button>"
+
+End Sub
+
+
+
+Sub ModifierDuree
+    document.getElementById("dureeAffiche").innerHTML = _
+        "<input type='text' class='saisie' style='width:90px; background:#FFFFD9; text-align:center;' id='saisieDuree' onkeydown='ValiderEntreeDuree'>" & _
+        "<button class='button' style='width:65px;' onclick='ValiderDuree'>OK</button>"
+    document.getElementById("saisieDuree").focus
+End Sub
+
+
+Sub ValiderEntreeDuree
+    If window.event.keyCode = 13 Then ValiderDuree
+End Sub
+
+Sub ValiderDuree
+    Dim d
+    d = Trim(document.getElementById("saisieDuree").value)
+    If Not IsNumeric(d) Then Exit Sub
+    If CDbl(d) <= 0 Then Exit Sub
+    document.getElementById("duration_prog").value = d
+    document.getElementById("dureeAffiche").innerHTML = _
+        "<button class='button' style='width:160px;' onclick='ModifierDuree'>" & d & "</button>"
+	SaveConfig
+End Sub
+
+Sub AnnulerDuree
+    If document.getElementById("dureeAffiche").contains(document.activeElement) Then Exit Sub
+    Dim d
+    d = document.getElementById("duration_prog").value
+    document.getElementById("dureeAffiche").innerHTML = _
+        "<button class='button' style='width:160px;' onclick='ModifierDuree'>" & d & "</button>"
+End Sub
+
+
+Sub ModifierIdent
+
+    document.getElementById("identAffiche").innerHTML = _
+        "<input type='text' id='saisieIdent' class='saisie' style='width:160px; background:#FFFFC0;'>" & _
+        "<button class='button' style='width:65px;' onclick='ValiderIdent'>OK</button>"
+
+    document.getElementById("saisieIdent").value = document.getElementById("identifier").value
+    document.getElementById("saisieIdent").focus
+End Sub
+
+Sub ValiderIdent
+    Dim id
+    id = Trim(document.getElementById("saisieIdent").value)
+    If id = "" Then Exit Sub
+    document.getElementById("identifier").value = id
+    SaveConfig
+    document.getElementById("identAffiche").innerHTML = _
+        "<button class='button' style='width:160px;' onclick='ModifierIdent'>ID utilisateur</button>"
+End Sub
+
+Sub AnnulerIdent
+    If document.getElementById("identAffiche").contains(document.activeElement) Then Exit Sub
+    document.getElementById("identAffiche").innerHTML = _
+        "<button class='button' style='width:160px;' onclick='ModifierIdent'>ID utilisateur</button>"
+End Sub
+
+Sub OuvrirDossier
+    Dim shell, fso
+    Set fso = CreateObject("Scripting.FileSystemObject")
+
+    If Not fso.FolderExists(RECORD_DIR) Then
+        MsgBox "Dossier introuvable : " & RECORD_DIR, 48, "Erreur"
+        Exit Sub
+    End If
+
+    Set shell = CreateObject("WScript.Shell")
+    shell.Run "explorer.exe """ & RECORD_DIR & """", 1, False
+
+End Sub
+
+
+Sub AfficherCalendrier
+
+    calendarMonth = Month(scheduleDate)
+    calendarYear = Year(scheduleDate)
+
+    DessinerCalendrier
+
+    document.getElementById("calendrier").style.display = "block"
+
+End Sub
+
+
+Sub DessinerCalendrier
+
+    Dim html, firstDay, daysInMonth, d
+    Dim i, iso, mois
+
+    mois = Array("Janvier", "Fevrier", "Mars", "Avril", _
+                 "Mai", "Juin", "Juillet", "Aout", _
+                 "Septembre", "Octobre", "Novembre", "Decembre")
+
+    firstDay = Weekday(DateSerial(calendarYear, calendarMonth, 1), vbMonday)
+    daysInMonth = Day(DateSerial(calendarYear, calendarMonth + 1, 0))
+
+    html = "<table width='100%' cellpadding='3' cellspacing='1'>"
+
+    html = html & "<tr>"
+    html = html & "<td><button onclick='MoisPrecedent'>&lt;</button></td>"
+    html = html & "<td colspan='5' align='center'><b>" & _
+           mois(calendarMonth - 1) & " " & calendarYear & "</b></td>"
+    html = html & "<td><button onclick='MoisSuivant'>&gt;</button></td>"
+    html = html & "</tr>"
+
+    html = html & "<tr align='center'>"
+    html = html & "<td>L</td><td>M</td><td>M</td>"
+    html = html & "<td>J</td><td>V</td><td>S</td><td>D</td>"
+    html = html & "</tr><tr>"
+
+    For i = 1 To firstDay - 1
+        html = html & "<td></td>"
+    Next
+
+    For d = 1 To daysInMonth
+
+        iso = calendarYear & "-" & _
+              Right("0" & calendarMonth, 2) & "-" & _
+              Right("0" & d, 2)
+
+        html = html & "<td align='center'>"
+        html = html & "<button style='width:29px;height:29px;padding:0;' " & _
+               "onclick=""ChoisirDate '" & iso & "'"">" & d & "</button>"
+        html = html & "</td>"
+
+        If (firstDay - 1 + d) Mod 7 = 0 Then
+            html = html & "</tr><tr>"
+        End If
+
+    Next
+
+    html = html & "</tr></table>"
+
+    document.getElementById("calendrier").innerHTML = html
+
+End Sub
+
+
+Sub MoisPrecedent
+
+    calendarMonth = calendarMonth - 1
+
+    If calendarMonth < 1 Then
+        calendarMonth = 12
+        calendarYear = calendarYear - 1
+    End If
+
+    DessinerCalendrier
+
+End Sub
+
+
+Sub MoisSuivant
+
+    calendarMonth = calendarMonth + 1
+
+    If calendarMonth > 12 Then
+        calendarMonth = 1
+        calendarYear = calendarYear + 1
+    End If
+
+    DessinerCalendrier
+
+End Sub
+
+Sub DateToday
+    scheduleDate = Date
+    ActualiserDate
+    SaveConfig
+End Sub
+
+Sub ChoisirDate(iso)
+    scheduleDate = DateSerial( _
+        CInt(Left(iso, 4)), _
+        CInt(Mid(iso, 6, 2)), _
+        CInt(Right(iso, 2)))
+
+    ActualiserDate
+	SaveConfig
+
+    document.getElementById("calendrier").style.display = "none"
+End Sub
+
+
+Sub ActualiserDate
+    document.getElementById("dateBtn").innerText = _
+        Right("0" & Day(scheduleDate), 2) & "/" & _
+        Right("0" & Month(scheduleDate), 2) & "/" & _
+        Year(scheduleDate)
+
+End Sub
+
 </script>
 </head>
 <body>
@@ -575,8 +1015,14 @@ End Sub
 		<span class="texte_lib"> chaine TV </span>
     </div>	
     <div class="marge_txt">
-        <input type="text" class="saisie" style= "text-align: center;" id="duration"> 
-		<span class="texte_lib"> Durée d'enregistrement (min) </span>
+
+<span id="dureeEnregAffiche" style="vertical-align: middle;"
+      onfocusout="AnnulerDureeEnreg">
+    <button class="button" style="width:160px;" onclick="ModifierDureeEnreg">60</button>
+</span>
+<input type="hidden" id="duration" value="60">	
+		<span class="texte_lib"><b>Min &nbsp;</b></span>
+		<span class="texte_lib"> (Cliquer pour modifier la durée)</span>
     </div>
     <div class="buttons">
 		<button id="watchBtn" class="button" onclick="StartViewing">VOIR</button>
@@ -585,16 +1031,30 @@ End Sub
 		<button id="razBtn" class="button" onclick="ResetTimer">RAZ</button>
     </div>
 
-<br>
+
 <fieldset>
-    <legend>Programmation</legend>
+    <legend>PROG</legend> 
 <table width="100%" cellpadding="5" cellspacing="0" border="6" bordercolor="#CCCCCC" style="border-collapse: collapse">
     <tr>
-        <td width="200px">
-            <label>Début</label>
-        </td>
+		<td width="270px">
+			<div style="white-space:nowrap;">
+				<button class="button" style="width:160px;"
+						id="dateBtn" onclick="AfficherCalendrier">
+					11/11/2026
+				</button>
+				&nbsp; &nbsp;	
+				<button class="button" style="width:110px;"
+						onclick="DateToday">ce jour</button>
+			</div>
+		
+			<div id="calendrier"
+				style="display:none; position:absolute; z-index:1000;
+					background:white; border:1px solid #777;
+					padding:8px; width:245px;">
+			</div>
+		</td>		
         <td width="110px">
-            <label>Durée (Min)</label>
+            <label>Durée</label>
         </td>
         <td>
             &nbsp;
@@ -605,29 +1065,42 @@ End Sub
 			<span id="heureAffiche" onfocusout="AnnulerHeure" style="vertical-align: middle;">
 				<button class="button" style="width: 138px;" onclick="ModifierHeure">12</button>
 			</span>
-			<span class="texte_lib">H</span>
+			<span class="texte_lib"><b>H</b></span>
 			<span id="minuteAffiche" style="vertical-align: middle;" onfocusout="AnnulerMinute">
 				<button class="button" style="width: 138px;" onclick="ModifierMinute">00</button>
 			</span>
 			<input type="hidden" id="scheduleTime" value="12:00">
         </td>
         <td>
-            <input type="text" class="saisie" style="width: 90px; text-align: center;" id="duration_prog">
+<span id="dureeAffiche" style="vertical-align: middle;" onfocusout="AnnulerDuree">
+    <button class="button" style="width:160px;" onclick="ModifierDuree">90</button>
+</span>
+<span class="texte_lib"><b>&nbsp;Min</b></span>
+			<input type="hidden" id="duration_prog" value="90">
         </td>
         <td>
-            <button id="scheduleBtn" class="button" onclick="ToggleSchedule" 
-				style="backgroundColor:#DDDDDD; color:#989898" >Désactivé</button>
+            <button id="scheduleBtn" class="button" style="width:70px;" onclick="ToggleSchedule" 
+				style="backgroundColor:#DDDDDD; color:#989898" >OFF</button>
 			
         </td>
     </tr>
 </table>
 </fieldset>
 
-    <div class="marge_txt">
-        <input type="text" id="identifier" style="width:160px;" class="saisie">
-        <button id="okIdent" class="button" onclick="SaveConfig">Modifier</button>
-		<span class="texte_lib"> ID utilisateur </span>
-    </div>
+<div class="marge_txt">
+
+	<button id="mp4Btn" class="button"
+        style="background:#555555;color:white;"
+        onclick="OuvrirDossier">Fichiers</button>
+
+    <span id="identAffiche" style="vertical-align:middle;" onfocusout="AnnulerIdent">
+        <button class="button" style="width:160px;" onclick="ModifierIdent">
+            ID utilisateur
+        </button>
+    </span>
+    <input type="hidden" id="identifier">	
+	
+</div>
 
 <fieldset>
     <div id="info"></div>
