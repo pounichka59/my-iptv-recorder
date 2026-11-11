@@ -27,7 +27,6 @@ Mise en place (avec un pack Cbilling):
 
 projet d'évolution du script: 
 - modifier le nom de fichier et son emplacement (par exemple pour générer le fichier de sortie directement sur clef USB)
-- systeme de calendrier de sélection du jour pour la programmation
 - ajouter / supprimer un programme
 - pilotage à distance: pour ajouter un programme d'enregistrement et l'activer
 - Gestion des abonnements IPTV et des chaines (autres que Cbilling)
